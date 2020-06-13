@@ -2,21 +2,21 @@
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
   <channel>
     <title>cueblog</title>
-    <link>http://example.org/</link>
+    <link>http://cueo.github.io/</link>
     <description>Recent content on cueblog</description>
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <lastBuildDate>Sat, 13 Jun 2020 00:00:00 +0000</lastBuildDate>
     
-	<atom:link href="http://example.org/index.xml" rel="self" type="application/rss+xml" />
+	<atom:link href="http://cueo.github.io/index.xml" rel="self" type="application/rss+xml" />
     
     
     <item>
       <title>Building a Kotlin library with Gradle</title>
-      <link>http://example.org/tech/kotlin-gradle-lib/</link>
+      <link>http://cueo.github.io/tech/kotlin-gradle-lib/</link>
       <pubDate>Sat, 06 Jun 2020 13:58:19 +0530</pubDate>
       
-      <guid>http://example.org/tech/kotlin-gradle-lib/</guid>
+      <guid>http://cueo.github.io/tech/kotlin-gradle-lib/</guid>
       <description>Build a Kotlin library with linting and code coverage from the scratch with Gradle and finally push it to the Nexus.</description>
     </item>
     
