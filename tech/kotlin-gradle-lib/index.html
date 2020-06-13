@@ -1,0 +1,389 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+<meta http-equiv="X-UA-Compatible" content="ie=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+<meta name="author" content="">
+<meta name="description" content="Build a Kotlin library with linting and code coverage from the scratch with Gradle and finally push it to the Nexus." />
+<meta name="keywords" content="" />
+<meta name="robots" content="noodp" />
+<meta name="theme-color" content="" />
+<link rel="canonical" href="http://example.org/tech/kotlin-gradle-lib/" />
+
+
+    <title>
+        
+            Building a Kotlin library with Gradle :: cueblog 
+        
+    </title>
+
+
+
+<link href="https://cdnjs.cloudflare.com/ajax/libs/flag-icon-css/3.2.1/css/flag-icon.min.css" rel="stylesheet"
+    type="text/css">
+
+
+
+<link rel="stylesheet" href="/main.dede02da9537a98158079c023e83573e18127834838ef08172acce888341a797.css">
+
+
+
+
+
+
+<meta itemprop="name" content="Building a Kotlin library with Gradle">
+<meta itemprop="description" content="Build a Kotlin library with linting and code coverage from the scratch with Gradle and finally push it to the Nexus.">
+<meta itemprop="datePublished" content="2020-06-06T13:58:19&#43;05:30" />
+<meta itemprop="dateModified" content="2020-06-06T13:58:19&#43;05:30" />
+<meta itemprop="wordCount" content="928">
+
+
+
+<meta itemprop="keywords" content="" />
+<meta name="twitter:card" content="summary"/>
+<meta name="twitter:title" content="Building a Kotlin library with Gradle"/>
+<meta name="twitter:description" content="Build a Kotlin library with linting and code coverage from the scratch with Gradle and finally push it to the Nexus."/>
+
+
+
+
+
+
+
+    <meta property="article:published_time" content="2020-06-06 13:58:19 &#43;0530 IST" />
+
+
+
+
+
+
+
+
+    </head>
+
+    <body class="dark-theme">
+        <div class="container">
+            <header class="header">
+    <span class="header__inner">
+        <a href="http://example.org/" style="text-decoration: none;">
+    <div class="logo">
+        
+            <span class="logo__mark">></span>
+            <span class="logo__text">hello</span>
+            <span class="logo__cursor" style=
+                  "
+                   
+                   ">
+            </span>
+        
+    </div>
+</a>
+
+
+        <span class="header__right">
+            
+                <nav class="menu">
+    <ul class="menu__inner"><li><a href="http://example.org/tech/">Tech</a></li>
+    </ul>
+</nav>
+
+                <span class="menu-trigger">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                        <path d="M0 0h24v24H0z" fill="none"/>
+                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
+                    </svg>
+                </span>
+            
+
+            <span class="theme-toggle unselectable"><svg class="theme-toggler" width="24" height="24" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <path d="M22 41C32.4934 41 41 32.4934 41 22C41 11.5066 32.4934 3 22
+  3C11.5066 3 3 11.5066 3 22C3 32.4934 11.5066 41 22 41ZM7 22C7
+  13.7157 13.7157 7 22 7V37C13.7157 37 7 30.2843 7 22Z"/>
+</svg>
+</span>
+        </span>
+    </span>
+</header>
+
+
+            <div class="content">
+                
+    <main class="post">
+
+        <div class="post-info">
+            
+            </p>
+        </div>
+
+        <article>
+            <h2 class="post-title"><a href="http://example.org/tech/kotlin-gradle-lib/">Building a Kotlin library with Gradle</a></h2>
+
+            
+
+            <div class="post-content">
+                <h2 id="introduction">Introduction</h2>
+<p>The most boring part of a library is the setting up part. Choosing the build systems, publishing builds, setting up code coverage, linting, etc etc. This blog is aimed at abstracting those concerns in the form of a simple file at the end of all this.</p>
+<h2 id="choosing-a-build-system">Choosing a build system</h2>
+<ul>
+<li>Gradle</li>
+<li>Maven</li>
+</ul>
+<p>Both Gradle and Maven have their own pros and cons. It is not in the scope of this article to delve into those details. However, I&rsquo;d mention that Gradle tends to be a little bit faster while Maven has better support (in terms of IDE or plugins).</p>
+<p>In this blog, we will only deal with Gradle.</p>
+<h2 id="initial-set-up">Initial set-up</h2>
+<p>For a Kotlin project, our initial Gradle file looks something like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-groovy" data-lang="groovy">plugins <span style="color:#f92672">{</span>
+  id <span style="color:#e6db74">&#39;org.jetbrains.kotlin.jvm&#39;</span> version <span style="color:#e6db74">&#39;1.3.72&#39;</span>
+<span style="color:#f92672">}</span>
+
+group <span style="color:#e6db74">&#39;com.cueo&#39;</span>
+version <span style="color:#e6db74">&#39;1.0-SNAPSHOT&#39;</span>
+
+repositories <span style="color:#f92672">{</span>
+  mavenLocal<span style="color:#f92672">()</span>
+  mavenCentral<span style="color:#f92672">()</span>
+<span style="color:#f92672">}</span>
+
+dependencies <span style="color:#f92672">{</span>
+  implementation <span style="color:#e6db74">&#34;org.jetbrains.kotlin:kotlin-stdlib-jdk8&#34;</span>
+<span style="color:#f92672">}</span>
+
+compileKotlin <span style="color:#f92672">{</span>
+  kotlinOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">jvmTarget</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;1.8&#34;</span>
+<span style="color:#f92672">}</span>
+compileTestKotlin <span style="color:#f92672">{</span>
+  kotlinOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">jvmTarget</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;1.8&#34;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>Few pointers about the above configuration:</p>
+<ol>
+<li><code>plugins</code> In order to build your Kotlin project with Gradle you need to set-up the <code>kotlin-gradle</code> plugin. This is done by the line: <code>id 'org.jetbrains.kotlin.jvm' version '1.3.72'</code>. (<code>1.3.72</code> is the latest version at the time of writing).</li>
+<li><code>repositories</code>  This is where you configure if you want to download the artifacts from Maven <a href="https://repo.maven.apache.org/maven2/">central</a>, a Nexus proxy or your organisation&rsquo;s specific Nexus. Do NOT forget to add <code>mavenLocal()</code>. This speeds up loading of the dependencies even if you do not have them cached in the <code>build</code> folder. If some other project has a same dependency, it loads the dependency from Maven&rsquo;s <code>.m2</code> folder.</li>
+<li><code>kotlinOptions.jvmTarget</code> inside <code>compileKotlin</code> and <code>compileTestKotlin</code> ensures the target JVM.</li>
+</ol>
+<h2 id="linting">Linting</h2>
+<p>A linter forces (and sometimes formats) the code to follow a coding style. If you work on a project with several team members, linting ensures the project follows a specific coding style, eg: use spaces instead of tabs, space before brackets and braces, space after commas, etc.</p>
+<p>Let&rsquo;s enable <a href="https://ktlint.github.io">ktlint</a> in our project.</p>
+<blockquote>
+<p>An anti-bikeshedding Kotlin linter with built-in formatter.</p>
+</blockquote>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-groovy" data-lang="groovy">plugins <span style="color:#f92672">{</span>
+  <span style="color:#f92672">...</span>
+  id <span style="color:#e6db74">&#39;org.jlleitschuh.gradle.ktlint&#39;</span> version <span style="color:#e6db74">&#39;9.2.1&#39;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>That&rsquo;s it! Now you can run:</p>
+<ul>
+<li><code>gradle ktlint</code> to check for errors.</li>
+<li><code>gradle ktlintFormat</code> to auto fix some of the <em>fixable</em> errors.</li>
+</ul>
+<p>Adding the plugin also automatically attaches itself to the <code>build</code> lifecycle.</p>
+<h2 id="code-coverage">Code coverage</h2>
+<p>We will use Gradle&rsquo;s <a href="https://docs.gradle.org/current/userguide/jacoco_plugin.html">Jacoco</a> plugin for checking code coverage. Start by adding Jacoco to the list of plugins.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-groovy" data-lang="groovy">plugins <span style="color:#f92672">{</span>
+  <span style="color:#f92672">...</span>
+  id <span style="color:#e6db74">&#39;jacoco&#39;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>You can also make sure each every time <code>gradle test</code> runs, a coverage report is generated by Jacoco.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-groovy" data-lang="groovy">test <span style="color:#f92672">{</span>
+  finalizedBy jacocoTestReport
+<span style="color:#f92672">}</span>
+</code></pre></div><p>Enable or disable Jacoco XML and HTML reports as follows:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-groovy" data-lang="groovy">jacocoTestReport <span style="color:#f92672">{</span>
+  reports <span style="color:#f92672">{</span>
+    xml<span style="color:#f92672">.</span><span style="color:#a6e22e">enabled</span> <span style="color:#66d9ef">true</span>
+    html<span style="color:#f92672">.</span><span style="color:#a6e22e">enabled</span> <span style="color:#66d9ef">true</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="publish-to-nexus">Publish to Nexus</h2>
+<p>Eventually you&rsquo;d want to publish your library to Nexus so that other projects can add your library as a dependency. We will use Gradle&rsquo;s <code>maven-publish</code> plugin to do that. You can find detailed description of the plugin <a href="https://docs.gradle.org/current/userguide/publishing_maven.html">here</a>.</p>
+<p>Add the plugin to <code>build.gradle</code>:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-groovy" data-lang="groovy">plugins <span style="color:#f92672">{</span>
+  <span style="color:#f92672">...</span>
+  id <span style="color:#e6db74">&#39;maven-publish&#39;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>Configure the plugin:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-groovy" data-lang="groovy">publishing <span style="color:#f92672">{</span>
+  publications <span style="color:#f92672">{</span>
+    mavenJava<span style="color:#f92672">(</span>MavenPublication<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      artifactId <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;awesome-kotlin-lib&#39;</span>
+      from components<span style="color:#f92672">.</span><span style="color:#a6e22e">java</span>
+      pom <span style="color:#f92672">{</span>
+        name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Awesome Kotlin Library&#39;</span>
+        description <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;An awesome library written in Kotlin built using Gradle.&#39;</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+  repositories <span style="color:#f92672">{</span>
+    maven <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">def</span> snapshotsRepoUrl <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://your-nexus-url.com/snapshots&#39;</span>
+      <span style="color:#66d9ef">def</span> releasesRepoUrl <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://your-nexus-url.com/releases&#39;</span>
+      url <span style="color:#f92672">=</span> version<span style="color:#f92672">.</span><span style="color:#a6e22e">endsWith</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;SNAPSHOT&#39;</span><span style="color:#f92672">)</span> <span style="color:#f92672">?</span> snapshotsRepoUrl <span style="color:#f92672">:</span> releasesRepoUrl
+
+      credentials <span style="color:#f92672">{</span>
+        username <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">getenv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;NEXUS_USERNAME&#39;</span><span style="color:#f92672">)</span>
+        password <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">getenv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;NEXUS_PASSWORD&#39;</span><span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>The above configuration makes some assumptions about the maven repository:</p>
+<ul>
+<li>The URLs for SNAPSHOT and RELEASE builds are different. You might as well use the same endpoint for both SNAPSHOT and RELEASE builds.</li>
+<li>Your system or CI is configured with the Nexus username and password. Locally you can just do the following before running <code>gradle publish</code>:</li>
+</ul>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-bash" data-lang="bash">export NEXUS_USERNAME<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;username&#39;</span>
+export NEXUS_PASSWORD<span style="color:#f92672">=</span><span style="color:#e6db74">&#39;unhackable-password&#39;</span>
+</code></pre></div><p>Now <code>gradle publish</code> will publish your jar to the Nexus given you have sufficient permissions.</p>
+<h2 id="releases">Releases</h2>
+<p><code>maven-publish</code> is incomplete without a release plugin. While the former publishes the jar to the Nexus, the latter is responsible for bumping up the versions in Git and creating relevant tags. We will use <a href="https://github.com/researchgate/gradle-release"><code>gradle-release</code></a> plugin by ResearchGate. As usual, start by adding the plugin.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-groovy" data-lang="groovy">plugins <span style="color:#f92672">{</span>
+  <span style="color:#f92672">...</span>
+  id <span style="color:#e6db74">&#39;net.researchgate.release&#39;</span> version <span style="color:#e6db74">&#39;2.6.0&#39;</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>Configure the plugin with your Github username and token.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-groovy" data-lang="groovy">release <span style="color:#f92672">{</span>
+  svn <span style="color:#f92672">{</span>
+    username <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">getenv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;GITHUB_USERNAME&#39;</span><span style="color:#f92672">)</span>
+    password <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">getenv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;GITHUB_TOKEN&#39;</span><span style="color:#f92672">)</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>Make sure each <code>gradle release</code> is followed by publishing the new build to the Nexus.</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-groovy" data-lang="groovy">tasks <span style="color:#f92672">{</span>
+  afterReleaseBuild <span style="color:#f92672">{</span>
+    dependsOn publish
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><h2 id="conclusion">Conclusion</h2>
+<p>In the end our <code>build.gradle</code> file should look something like this:</p>
+<div class="highlight"><pre style="color:#f8f8f2;background-color:#272822;-moz-tab-size:4;-o-tab-size:4;tab-size:4"><code class="language-groovy" data-lang="groovy">plugins <span style="color:#f92672">{</span>
+  id <span style="color:#e6db74">&#39;org.jlleitschuh.gradle.ktlint&#39;</span> version <span style="color:#e6db74">&#39;9.2.1&#39;</span>
+  id <span style="color:#e6db74">&#39;org.jetbrains.kotlin.jvm&#39;</span> version <span style="color:#e6db74">&#39;1.3.72&#39;</span>
+  id <span style="color:#e6db74">&#39;maven-publish&#39;</span>
+  id <span style="color:#e6db74">&#39;jacoco&#39;</span>
+  id <span style="color:#e6db74">&#39;net.researchgate.release&#39;</span> version <span style="color:#e6db74">&#39;2.6.0&#39;</span>
+<span style="color:#f92672">}</span>
+
+java <span style="color:#f92672">{</span>
+  withSourcesJar<span style="color:#f92672">()</span>
+<span style="color:#f92672">}</span>
+
+repositories <span style="color:#f92672">{</span>
+  mavenLocal<span style="color:#f92672">()</span>
+  mavenCentral<span style="color:#f92672">()</span>
+<span style="color:#f92672">}</span>
+
+dependencies <span style="color:#f92672">{</span>
+  implementation <span style="color:#e6db74">&#39;org.slf4j:slf4j-api:1.7.30&#39;</span>
+
+  implementation <span style="color:#e6db74">&#39;org.jetbrains.kotlin:kotlin-stdlib:1.3.72&#39;</span>
+
+  testImplementation <span style="color:#e6db74">&#39;org.jetbrains.kotlin:kotlin-test:1.3.72&#39;</span>
+  testImplementation <span style="color:#e6db74">&#39;org.junit.jupiter:junit-jupiter:5.6.0&#39;</span>
+  testImplementation <span style="color:#e6db74">&#39;io.mockk:mockk:1.9.3.kotlin12&#39;</span>
+<span style="color:#f92672">}</span>
+
+group <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;com.cueo&#39;</span>
+version <span style="color:#f92672">=</span> project<span style="color:#f92672">.</span><span style="color:#a6e22e">properties</span><span style="color:#f92672">[</span><span style="color:#e6db74">&#39;version&#39;</span><span style="color:#f92672">]</span>
+
+publishing <span style="color:#f92672">{</span>
+  publications <span style="color:#f92672">{</span>
+    mavenJava<span style="color:#f92672">(</span>MavenPublication<span style="color:#f92672">)</span> <span style="color:#f92672">{</span>
+      artifactId <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;awesome-kotlin-lib&#39;</span>
+      from components<span style="color:#f92672">.</span><span style="color:#a6e22e">java</span>
+      pom <span style="color:#f92672">{</span>
+        name <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;Awesome Kotlin Library&#39;</span>
+        description <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;An awesome library written in Kotlin built using Gradle.&#39;</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+  repositories <span style="color:#f92672">{</span>
+    maven <span style="color:#f92672">{</span>
+      <span style="color:#66d9ef">def</span> snapshotsRepoUrl <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://your-nexus-url.com/snapshots&#39;</span>
+      <span style="color:#66d9ef">def</span> releasesRepoUrl <span style="color:#f92672">=</span> <span style="color:#e6db74">&#39;https://your-nexus-url.com/releases&#39;</span>
+      url <span style="color:#f92672">=</span> version<span style="color:#f92672">.</span><span style="color:#a6e22e">endsWith</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;SNAPSHOT&#39;</span><span style="color:#f92672">)</span> <span style="color:#f92672">?</span> snapshotsRepoUrl <span style="color:#f92672">:</span> releasesRepoUrl
+
+      credentials <span style="color:#f92672">{</span>
+        username <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">getenv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;NEXUS_USERNAME&#39;</span><span style="color:#f92672">)</span>
+        password <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">getenv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;NEXUS_PASSWORD&#39;</span><span style="color:#f92672">)</span>
+      <span style="color:#f92672">}</span>
+    <span style="color:#f92672">}</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+compileKotlin <span style="color:#f92672">{</span>
+    kotlinOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">jvmTarget</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;1.8&#34;</span>
+<span style="color:#f92672">}</span>
+compileTestKotlin <span style="color:#f92672">{</span>
+    kotlinOptions<span style="color:#f92672">.</span><span style="color:#a6e22e">jvmTarget</span> <span style="color:#f92672">=</span> <span style="color:#e6db74">&#34;1.8&#34;</span>
+<span style="color:#f92672">}</span>
+
+test <span style="color:#f92672">{</span>
+  useJUnitPlatform
+  finalizedBy jacocoTestReport
+<span style="color:#f92672">}</span>
+
+jacocoTestReport <span style="color:#f92672">{</span>
+  reports <span style="color:#f92672">{</span>
+    xml<span style="color:#f92672">.</span><span style="color:#a6e22e">enabled</span> <span style="color:#66d9ef">true</span>
+    html<span style="color:#f92672">.</span><span style="color:#a6e22e">enabled</span> <span style="color:#66d9ef">true</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+release <span style="color:#f92672">{</span>
+  svn <span style="color:#f92672">{</span>
+    username <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">getenv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;GITHUB_USERNAME&#39;</span><span style="color:#f92672">)</span>
+    password <span style="color:#f92672">=</span> System<span style="color:#f92672">.</span><span style="color:#a6e22e">getenv</span><span style="color:#f92672">(</span><span style="color:#e6db74">&#39;GITHUB_TOKEN&#39;</span><span style="color:#f92672">)</span>
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+
+tasks <span style="color:#f92672">{</span>
+  afterReleaseBuild <span style="color:#f92672">{</span>
+    dependsOn publish
+  <span style="color:#f92672">}</span>
+<span style="color:#f92672">}</span>
+</code></pre></div><p>That&rsquo;s all, folks! You can now go ahead and write tons of libraries helping out all the developers out there.</p>
+<p>Cheers! 🍻</p>
+
+            </div>
+        </article>
+
+        <hr />
+
+        <div class="post-info">
+  		</div>
+    </main>
+
+            </div>
+
+            
+                <footer class="footer">
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>&copy; 2020</span>
+            
+            
+            <span> <a href="http://example.org/posts/index.xml" target="_blank" title="rss"><svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-rss"><path d="M4 11a9 9 0 0 1 9 9"></path><path d="M4 4a16 16 0 0 1 16 16"></path><circle cx="5" cy="19" r="1"></circle></svg></a></span>
+        </div>
+    </div>
+    <div class="footer__inner">
+        <div class="footer__content">
+            <span>Powered by <a href="http://gohugo.io">Hugo</a></span>
+            <span>Made with &#10084; by <a href="https://github.com/rhazdon">Djordje Atlialp</a></span>
+        </div>
+    </div>
+</footer>
+
+            
+        </div>
+
+        
+
+
+
+
+<script type="text/javascript" src="/bundle.min.dc716e9092c9820b77f96da294d0120aeeb189b5bcea9752309ebea27fd53bbe6b13cffb2aca8ecf32525647ceb7001f76091de4199ac5a3caa432c070247f5b.js" integrity="sha512-3HFukJLJggt3&#43;W2ilNASCu6xibW86pdSMJ6&#43;on/VO75rE8/7KsqOzzJSVkfOtwAfdgkd5BmaxaPKpDLAcCR/Ww=="></script>
+
+
+
+    </body>
+</html>
